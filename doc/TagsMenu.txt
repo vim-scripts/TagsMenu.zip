@@ -1,0 +1,111 @@
+*TagsMenu.txt*   Plugin to add all known tags to a menu.
+
+INDEX
+
+|TagsMenu-purpose|
+|TagsMenu-requirements|
+|TagsMenu-installation|
+|TagsMenu-execution|
+|TagsMenu-filetypes|
+|TagsMenu-options|
+    |TagsMenu_ctagsCommand|
+    |TagsMenu_debug|
+    |TagsMenu_escapeChars|
+    |TagsMenu_groupByType|
+    |TagsMenu_useAutoCommand|
+
+--------------------------------------------------------------------------
+
+PURPOSE                                             *TagsMenu-purpose*
+
+This plugin will find all the tags in the current file, and make a menu of
+these tags.  Each menu item is a move command to that tag (not actually a :tag
+command, but a /unique search pattern/ to that tag).
+
+
+REQUIREMENTS                                        *TagsMenu-requirements*
+
+The only requirement for this plugin to work is that Exuberant Ctags (see
+|ctags|) version 5.x is installed somewhere in your path.  If you do have it
+installed but not in your path, you could also set the |TagsMenu_ctagsCommand|
+to explicitly point to your ctags installation.  No other external
+requirements are necessary.
+
+
+INSTALLATION                                        *TagsMenu-installation*
+
+To add the plugin, see the vim help on the subject |add-global-plugin| (:h
+add-global-plugin).  To add the accompanying help file, see the vim help on the
+subject |add-local-help|.
+
+
+EXECUTION                                           *TagsMenu-execution*
+
+Automatic execution:  the plugin will automaticly execute (depending on the
+value of the |TagsMenu_useAutoCommand| option) when a buffer is entered of 
+a recognized filetype (see |TagsMenu-filetypes|).
+
+Manual execution:  there are two ways to manually force the recalculation of
+the menu: 
+    <leader>t
+        - this mapping depends on the value of <leader> for your
+          configuration.  By default it is '\'.  See |mapleader|.
+    menu Tags -> Rebuild Tags Menu 
+        - this will only appear if the tags menu has already been created.
+
+
+REGOGNIZED FILETYPES                                *TagsMenu-filetypes*
+
+The current list of recognized |filetypes| is limited to the list of types
+recognized by ctags.  These include: asm, awk, c, cpp, cxx, sh, cobol, eiffel,
+fortran, java, lisp, make, pascal, perl, php, python, rexx, ruby, scheme, tcl,
+and vim.
+
+
+OPTIONS                                             *TagsMenu-options*
+
+The following options can be set in your .vimrc/_vimrc file to modify the
+behaviour of the TagsMenu plugin:
+
+g:TagsMenu_ctagsCommand                             *TagsMenu_ctagsCommand*
+    This option allows you to explicitly state the location of the ctags
+    command, plus any extra ctags command line parameters desired.  See
+    |ctags| for more information on the ctags program.  Note that this script
+    requires you to use the Exuberant Ctags (as the plugin uses particular
+    extended formating output).  The default is:
+        let g:TagsMenu_ctagsCommand = "ctags -f - --fields=+K "
+
+g:TagsMenu_debug                                    *TagsMenu_debug*
+    This option allows you to see debugging information as the script is
+    running.  The default is:
+        let g:TagsMenu_debug = 0
+    Note that 0 = False, while 1 = True.
+
+g:TagsMenu_escapeChars                              *TagsMenu_escapeChars*
+    There are certain characters that need to be escaped when placed into a
+    menu.  Currently, only '|' is know.  However, this option allows you to
+    modify the list of characters to be escaped.  The default is:
+        let g:TagsMenu_escapeChars = "|"
+
+g:TagsMenu_groupByType                              *TagsMenu_groupByType*
+    TagsMenu can build a menu one of two different ways: all the tags listed
+    alphabetically, or grouped together by type into submenus.  This option
+    allows you to choose your preference.  The default is:
+        let g:TagsMenu_groupByType = 1
+    which means to group all the methods together in a submenu, all the
+    classes together in a submenu, etc.  The values are 0 = False, and 1 =
+    True.
+
+g:TagsMenu_useAutoCommand                           *TagsMenu_useAutoCommand*
+    The TagsMenu menu generator function can be set to run automatically when a
+    filetype is loaded that the ctags program recognizes.  This option allows
+    you to modify whether or not to automatically generate the tags menu.  The
+    default is:
+        let g:TagsMenu_useAutoCommand = 1
+    Again, 0 = false, 1 = true.
+
+
+Version: 0.91
+Author: Jay Dickon Glanville (plus others) <jayglanville@home.com>
+Location: http://members.home.net/jayglanville/tagsmenu/TagsMenu.html
+Last Modified: 7 August 2001

@@ -1,0 +1,45 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=55
+
+*TagsMenu.txt*   Plugin to add all known tags to a menu.
+
+--------------------------------------------------------------------------
+The following is a cut-and-paste of the TagsMenu help file that is packaged in the attached zip file.
+--------------------------------------------------------------------------
+
+PURPOSE                                             *TagsMenu-purpose*
+
+This plugin will find all the tags in the current file, and make a menu of these tags.  Each menu item is a move command to that tag (not actually a :tag command, but a /unique search pattern/ to that tag).
+
+
+REQUIREMENTS                                        *TagsMenu-requirements*
+
+The only requirement for this plugin to work is that Exuberant Ctags (see |ctags|) version 5.x is installed somewhere in your path.  If you do have it installed but not in your path, you could also set the |TagsMenu_ctagsCommand| to explicitly point to your ctags installation.  No other external requirements are necessary.
+
+
+INSTALLATION                                        *TagsMenu-installation*
+
+To add the plugin, see the vim help on the subject |add-global-plugin| (:h add-global-plugin).  To add the accompanying help file, see the vim help on the subject |add-local-help|.
+
+
+EXECUTION                                           *TagsMenu-execution*
+
+Automatic execution:  the plugin will automaticly execute (depending on the value of the |TagsMenu_useAutoCommand| option) when a buffer is entered of a recognized filetype (see |TagsMenu-filetypes|).
+
+Manual execution:  there are two ways to manually force the recalculation of the menu: 
+    <leader>t
+        - this mapping depends on the value of <leader> for your configuration.  By default it is '&#039.  See |mapleader|.
+    menu Tags -> Rebuild Tags Menu 
+        - this will only appear if the tags menu has already been created.
+
+
+REGOGNIZED FILETYPES                                *TagsMenu-filetypes*
+
+The current list of recognized |filetypes| is limited to the list of types recognized by ctags.  These include: asm, awk, c, cpp, cxx, sh, cobol, eiffel, fortran, java, lisp, make, pascal, perl, php, python, rexx, ruby, scheme, tcl, and vim.
+
+
+
+Version: 0.93
+Author: Jay Dickon Glanville (plus others) <jayglanville at rogers.com>
+Location: http://members.rogers.com/jayglanville/tagsmenu
+Last Modified: 4 Dec 2001
+
