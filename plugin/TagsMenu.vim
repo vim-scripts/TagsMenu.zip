@@ -1,7 +1,8 @@
 " Tags Menu for Vim: plugin to make a menu of tags in the current file
-" Last Modified: 7 August 2001
-" Maintainer: Jay Dickon Glanville <jayglanville@home.com>
-" Location: http://members.home.net/jayglanville/tagsmenu/TagsMenu.html.
+" Tagged Release Name: $Name: release-0_93 $
+" Maintainer: Jay Dickon Glanville ($Author: J D Glanville $)
+" Location: http://members.rogers.com/jayglanville/tagsmenu
+" $Header: d:\\cvsroot/tagsmenu/workspace/TagsMenu.vim,v 1.16 2001/12/04 18:57:36 J D Glanville Exp $
 " 
 " See the accompaning documentation file for information on purpose,
 " installation, requirements and available options.
@@ -29,18 +30,36 @@ autocmd FileType * call <SID>TagsMenu_checkFileType()
 
 " ------------------------------------------------------------------------
 " OPTIONS: can be set to define behaviour
+" The options are all wrapped in a "if !exists/endif" to prevent
+" overwriting of the users options.
 
-" this is the command to get tag info.  If you don't have version 4.0.2 or
-" greater of ctags, then modify this variable to remove the "--kind-long=yes" 
-let g:TagsMenu_ctagsCommand = "ctags -f - --fields=+K "
+" this is the command to get tag info.
+if !exists("g:TagsMenu_ctagsCommand")
+    if &ft == 'perl'  " Force perl, in case it is embedded in a .bat file
+        let g:TagsMenu_ctagsCommand = "ctags -f - --fields=+K --language-force=perl "
+    else
+        let g:TagsMenu_ctagsCommand = "ctags -f - --fields=+K "
+    endif
+endif
 " Does this script produce debugging information?
-let g:TagsMenu_debug = 0
+if !exists("g:TagsMenu_debug")
+    let g:TagsMenu_debug = 0
+endif
 " A list of characters that need to be escaped
-let g:TagsMenu_escapeChars = "|"
+if !exists("g:TagsMenu_excapeChars")
+    let g:TagsMenu_escapeChars = "|"
+endif
 " Are the tags grouped and submenued by tag type?
-let g:TagsMenu_groupByType = 1
+if !exists("g:TagsMenu_groupByType")
+    let g:TagsMenu_groupByType = 1
+endif
 " Does this script get automaticly run?
-let g:TagsMenu_useAutoCommand = 1
+if !exists("g:TagsMenu_useAutoCommand")
+    let g:TagsMenu_useAutoCommand = 1
+endif
+if !exists("g:TagsMenu_subgroupByFirstChar")
+    let g:TagsMenu_subgroupByFirstChar = 0
+endif
 
 
 
@@ -50,6 +69,8 @@ let g:TagsMenu_useAutoCommand = 1
 
 " The name of the menu
 let s:menu_name = "Ta&gs"
+" The name of the options menu
+let s:option_menu_name = "&Options"
 " command to turn on magic
 let s:yesmagic = ""
 " command to turn off magic
@@ -60,6 +81,8 @@ let s:bufferName = "temporary_buffer"
 let s:previousTag = ""
 " the count of the number of repeated tags
 let s:repeatedTagCount = 0
+" the list of currently recognized file types
+let s:recognizedFiletypes = " asm awk c cpp sh cobol eiffel fortran java lisp make pascal perl php python rexx ruby scheme tcl vim cxx "
 
 
 
@@ -71,10 +94,10 @@ function! s:TagsMenu_checkFileType()
     if !g:TagsMenu_useAutoCommand
         return
     endif
-    call s:DebugVariable( "filetype", &ft )
-    " sorry about the bad form of this if statement, but apparently, the
-    " expression needs to be terminated by an EOL. (I could use if/elseif...)
-    if  (&ft == "asm") || (&ft == "awk") || (&ft == "c") || (&ft == "cpp") || (&ft == "sh") || (&ft == "cobol") || (&ft == "eiffel") || (&ft == "fortran") || (&ft == "java") || (&ft == "lisp") || (&ft == "make") || (&ft == "pascal") || (&ft == "perl") || (&ft == "php") || (&ft == "python") || (&ft == "rexx") || (&ft == "ruby") || (&ft == "scheme") || (&ft == "tcl") || (&ft == "vim") || (&ft == "cxx")
+    let s:currentFiletype = " " . &ft . " "
+    call s:DebugVariable( "currentFiletype", s:currentFiletype )
+    let s:filetypeFound = stridx( s:recognizedFiletypes, s:currentFiletype )
+    if s:filetypeFound >= 0
         call s:TagsMenu_createMenu()
     endif
 endfunction
@@ -87,7 +110,7 @@ function! s:TagsMenu_createMenu()
     call s:InitializeMenu()
 
     " execute the ctags command on the current file
-    let command = g:TagsMenu_ctagsCommand . " " . expand("%")
+    let command = g:TagsMenu_ctagsCommand . " " . "\"" . expand("%") . "\""
     call s:DebugVariable( "command", command )
     let output = system( command )
     call s:DebugVariable( "local variable 'output'", output )
@@ -138,6 +161,21 @@ function s:InitializeMenu()
 
     " and now, add the top of the new menu
     execute "amenu " . s:menu_name . ".&Rebuild\\ Tags\\ Menu :call <SID>TagsMenu_createMenu()<CR><CR>"
+
+    " First, the Options -> subgroup by first character menu item
+    if g:TagsMenu_subgroupByFirstChar
+        execute "amenu " . s:menu_name . "." . s:option_menu_name . ".Do\\ not\\ sub&group\\ by\\ first\\ character :call <SID>TagsMenu_optionSubgroupByFirstChar( 0 )<CR>"
+    else
+        execute "amenu " . s:menu_name . "." . s:option_menu_name . ".Sub&group\\ by\\ first\\ character :call <SID>TagsMenu_optionSubgroupByFirstChar( 1 )<CR>"
+    endif
+
+    " Next, the Options -> group by time menu item
+    if g:TagsMenu_groupByType
+        execute "amenu " . s:menu_name . "." . s:option_menu_name . ".Do\\ not\\ group\\ by\\ &type :call <SID>TagsMenu_optionGroupByType( 0 )<CR>"
+    else
+        execute "amenu " . s:menu_name . "." . s:option_menu_name . ".Group\\ by\\ &type :call <SID>TagsMenu_optionGroupByType( 1 )<CR>"
+    endif
+
     execute "amenu " . s:menu_name . ".-SEP- :"
 endfunction
 
@@ -184,6 +222,10 @@ function s:MakeMenuEntry(line)
         " this expression is a line number not a pattern so prepend line number 
         " with : to make it an absolute line command not a relative one
         let expression = ":" . expression
+    else
+        " if you have nowrapscan on, then this will solve this by going back
+        " to the top of the file first.
+        let expression = ":0" . expression
     endif
 
     " strip out leading characters for level 1 to level 2 sparator
@@ -207,6 +249,9 @@ function s:MakeMenuEntry(line)
     let menu = "amenu " . s:menu_name 
     if g:TagsMenu_groupByType
       let menu = menu . ".&" . type
+    endif
+    if g:TagsMenu_subgroupByFirstChar
+        let menu = menu . "." . strpart(name, 0, 1)
     endif
     let menu = menu . ".&" . name
     if !g:TagsMenu_groupByType
@@ -234,3 +279,32 @@ function! s:DebugVariable(name, value)
         echo a:name . " = " . a:value
     endif
 endfunction
+
+" Changes the group-by-type option to turnOptionOn.  Primarily used by the
+" Tags -> Options menu.
+function s:TagsMenu_optionGroupByType( turnOptionOn )
+    if a:turnOptionOn
+        let g:TagsMenu_groupByType = 1
+        call s:TagsMenu_createMenu()
+        echo "Group by type = on for this session.  To set permanently, add \"let g:TagsMenu_groupByType = 1\" to your .vimrc."
+    else
+        let g:TagsMenu_groupByType = 0
+        call s:TagsMenu_createMenu()
+        echo "Group by type = off for this session.  To set permanently, add \"let g:TagsMenu_groupByType = 0\" to your .vimrc."
+    endif
+endfunction
+
+" Changes the subgroup-by-first-char option to turnOptionOn.  Primarily used 
+" by the Tags -> Options menu.
+function s:TagsMenu_optionSubgroupByFirstChar( turnOptionOn )
+    if a:turnOptionOn
+        let g:TagsMenu_subgroupByFirstChar = 1
+        call s:TagsMenu_createMenu()
+        echo "Subgroup by first character = on for this session.  To set permanently, add \"let g:TagsMenu_subgroupByFirstChar = 1\" to your .vimrc."
+    else
+        let g:TagsMenu_subgroupByFirstChar = 0
+        call s:TagsMenu_createMenu()
+        echo "Subgroup by first character = off for this session.  To set permanently, add \"let g:TagsMenu_subgroupByFirstChar = 0\" to your .vimrc."
+    endif
+endfunction
+

@@ -13,6 +13,9 @@ INDEX
     |TagsMenu_escapeChars|
     |TagsMenu_groupByType|
     |TagsMenu_useAutoCommand|
+    |TagsMenu_subgroupByFirstChar|
+|TagsMenu-known_bugs|
+|TagsMenu-admin_info|
 
 --------------------------------------------------------------------------
 
@@ -64,6 +67,17 @@ and vim.
 
 OPTIONS                                             *TagsMenu-options*
 
+Options can be set several ways: in the Tags -> Options menu, by ex commands
+(eg: :let Tags ...) or in your .vimrc file.
+
+Two of the options can be toggeled by the Tags -> Options menu.  They are:
+|TagsMenu_subgroupByFirstChar| and |TagsMenu_groupByType|.  When these menus
+are chosen, then the appropriate option is toggeled, and the tags menu is
+recalculated.  These options stay this way for the current session (ie: when
+Vim is restarted, the defaults and the setting from your .vimrc are used).  A
+message is then echoed to the user telling them how to set this option
+permanently.
+
 The following options can be set in your .vimrc/_vimrc file to modify the
 behaviour of the TagsMenu plugin:
 
@@ -104,8 +118,37 @@ g:TagsMenu_useAutoCommand                           *TagsMenu_useAutoCommand*
         let g:TagsMenu_useAutoCommand = 1
     Again, 0 = false, 1 = true.
 
+g:TagsMenu_subgroupByFirstChar                  *TagsMenu_subgroupByFirstChar*
+    Sometimes the list of available tags makes the menus quite long.  If this
+    option is set, then a menu of tags is grouped into submenus based on the
+    first character of the tag.  The default is:
+        let g:TagsMenu_subgroupByFirstChar = 0
+    
 
-Version: 0.91
-Author: Jay Dickon Glanville (plus others) <jayglanville@home.com>
-Location: http://members.home.net/jayglanville/tagsmenu/TagsMenu.html
-Last Modified: 7 August 2001
+
+--------------------------------------------------------------------------
+
+KNOWN BUGS                                          *TagsMenu-known_bugs*
+
+WINDOWS: "Cannot write to temporary file"
+
+Some windows users might get an error message that goes something like this:
+"Cannot write to temporary file" (I paraphrase).  A possible problem for this
+is that CTags cannot find the temporary directory.  If the %TEMP% variable is
+not set, and the current directory is read-only, then CTags cannot write
+temporary information to the hard drive.
+
+The work around for this problem is to edit the plugin so that you force
+TagsMenu to switch to the temporary directory just before execution, and
+switch back after execution.  Add "cd $temp" to be the first command and "cd
+-" to be the last command in the function TagsMenu_createMenu().
+
+
+--------------------------------------------------------------------------
+
+ADMINISTRATION INFORMATION                          *TagsMenu-admin_info*
+
+Tagged Release Name: $Name: release-0_93 $
+Maintainer: Jay Dickon Glanville ($Author: J D Glanville $)
+Location: http://members.rogers.com/jayglanville/tagsmenu
+$Header: d:\\cvsroot/tagsmenu/workspace/TagsMenu.txt,v 1.6 2001/12/04 18:57:36 J D Glanville Exp $
